@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Services & Menu — Golden Crumb Bakery</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav container">
+    <a href="index.html" class="brand"><span class="brand-mark">🥐</span> Golden Crumb</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="services.html" class="active">Services</a></li>
+      <li><a href="gallery.html">Gallery</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="login.html">Login</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="signup.html" class="btn btn-outline btn-sm">Sign Up</a>
+      <a href="cart.html" class="cart-link" aria-label="Cart">🛒<span class="cart-count" data-cart-count>0</span></a>
+      <button class="nav-toggle" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+</header>
+
+<section class="page-hero">
+  <div class="container">
+    <span class="eyebrow">What We Offer</span>
+    <h1>Services & Menu</h1>
+    <div class="breadcrumb"><a href="index.html">Home</a> / Services</div>
+  </div>
+</section>
+
+<!-- ===== Bakery products with add to cart ===== -->
+<section class="section-cream">
+  <div class="container">
+    <div class="section-header center">
+      <span class="eyebrow">Order Online</span>
+      <h2>Our Menu</h2>
+      <p>Fresh every morning. Add your favourites to the cart and check out below.</p>
+    </div>
+    <div class="grid grid-3">
+      <div class="card">
+        <div class="card-img"><img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80" alt="Sourdough loaf"></div>
+        <div class="card-body">
+          <span class="badge">Bestseller</span>
+          <h3>Classic Sourdough</h3>
+          <p>72-hour cold-fermented, crackling crust, soft open crumb.</p>
+          <div class="card-footer"><span class="price">Rs. 450</span><button class="add-cart-btn" data-add-cart="sourdough">+ Add</button></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-img"><img src="https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=400&q=80" alt="Butter croissants"></div>
+        <div class="card-body">
+          <span class="badge">New</span>
+          <h3>Butter Croissant</h3>
+          <p>72 layers of laminated French butter, baked to order.</p>
+          <div class="card-footer"><span class="price">Rs. 180</span><button class="add-cart-btn" data-add-cart="croissant">+ Add</button></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-img"><img src="https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=400&q=80" alt="Chocolate fudge cake"></div>
+        <div class="card-body">
+          <span class="badge">Popular</span>
+          <h3>Chocolate Fudge Cake</h3>
+          <p>Rich Belgian cocoa layers with silky ganache frosting.</p>
+          <div class="card-footer"><span class="price">Rs. 2,200</span><button class="add-cart-btn" data-add-cart="fudgecake">+ Add</button></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-img"><img src="https://images.unsplash.com/photo-1610851467358-e2a4a5804335?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cmVkJTIwdmVsdmV0JTIwY3VwJTIwY2FrZXxlbnwwfHwwfHx8MA%3D%3D" alt="Red velvet cupcakes"></div>
+        <div class="card-body">
+          <span class="badge">Box of 6</span>
+          <h3>Red Velvet Cupcakes</h3>
+          <p>Cream-cheese frosting, cocoa sponge, finished by hand.</p>
+          <div class="card-footer"><span class="price">Rs. 950</span><button class="add-cart-btn" data-add-cart="redvelvet">+ Add</button></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-img"><img src="https://media.istockphoto.com/id/1429597665/photo/homemade-pastry-cinnamon-roll-buns-in-rustic-autumn-kitchen-with-fresh-icing-sugar.webp?a=1&b=1&s=612x612&w=0&k=20&c=MxaNjRqXc-_FTIjnRmnH20PVc8AK1T9GRZdCVy4M99M=" alt="Cinnamon rolls"></div>
+        <div class="card-body">
+          <span class="badge">Warm & Soft</span>
+          <h3>Cinnamon Rolls</h3>
+          <p>Gooey brown-sugar swirl, cream-cheese glaze on top.</p>
+          <div class="card-footer"><span class="price">Rs. 650</span><button class="add-cart-btn" data-add-cart="cinnamon">+ Add</button></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-img"><img src="https://images.unsplash.com/photo-1519915028121-7d3463d20b13?auto=format&fit=crop&w=400&q=80" alt="Fresh fruit tart"></div>
+        <div class="card-body">
+          <span class="badge">Seasonal</span>
+          <h3>Fresh Fruit Tart</h3>
+          <p>Buttery shortcrust, vanilla custard, seasonal fruit.</p>
+          <div class="card-footer"><span class="price">Rs. 400</span><button class="add-cart-btn" data-add-cart="fruittart">+ Add</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Other services list ===== -->
+<section class="section-crust">
+  <div class="container">
+    <div class="section-header center">
+      <span class="eyebrow" style="color:var(--butter);">Beyond the Counter</span>
+      <h2>Custom & event services</h2>
+    </div>
+    <div style="max-width:820px; margin:0 auto;">
+      <div class="service-row">
+        <div class="service-icon">🎂</div>
+        <div>
+          <h3 style="color:var(--butter);">Custom Celebration Cakes</h3>
+          <p style="color:rgba(251,242,230,0.72);">Birthday, anniversary and theme cakes designed to your brief — 48 hours notice required.</p>
+        </div>
+      </div>
+      <div class="service-row">
+        <div class="service-icon">💍</div>
+        <div>
+          <h3 style="color:var(--butter);">Wedding & Engagement Cakes</h3>
+          <p style="color:rgba(251,242,230,0.72);">Multi-tier showpiece cakes with a complimentary tasting session before you book.</p>
+        </div>
+      </div>
+      <div class="service-row">
+        <div class="service-icon">📦</div>
+        <div>
+          <h3 style="color:var(--butter);">Corporate & Event Catering</h3>
+          <p style="color:rgba(251,242,230,0.72);">Dessert tables, bulk pastry boxes and grazing spreads for offices and events.</p>
+        </div>
+      </div>
+      <div class="service-row">
+        <div class="service-icon">🥖</div>
+        <div>
+          <h3 style="color:var(--butter);">Daily Bread Subscription</h3>
+          <p style="color:rgba(251,242,230,0.72);">Fresh loaves delivered to your door on a schedule that suits you — pause anytime.</p>
+        </div>
+      </div>
+      <div class="service-row">
+        <div class="service-icon">🎁</div>
+        <div>
+          <h3 style="color:var(--butter);">Gift Hampers</h3>
+          <p style="color:rgba(251,242,230,0.72);">Curated boxes of our best bakes, wrapped and ready for gifting.</p>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top:40px;">
+      <a href="contact.html" class="btn" style="background:var(--butter); color:var(--crust);">Enquire About an Event</a>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="brand"><span class="brand-mark">🥐</span> Golden Crumb</div>
+        <p>Handmade bread, cakes & pastries baked fresh every morning in the heart of Karachi.</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Facebook">f</a>
+          <a href="#" aria-label="Instagram">◎</a>
+          <a href="#" aria-label="WhatsApp">☎</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="services.html">Services</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Account</h4>
+        <ul>
+          <li><a href="login.html">Login</a></li>
+          <li><a href="signup.html">Sign Up</a></li>
+          <li><a href="cart.html">My Cart</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Stay Updated</h4>
+        <p style="font-size:0.85rem; margin-bottom:14px;">Get new flavours & offers in your inbox.</p>
+        <div class="newsletter-row">
+          <input type="email" placeholder="Your email">
+          <button>Join</button>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Golden Crumb Bakery. All rights reserved.</span>
+      <span><a href="#">Privacy Policy</a><a href="#">Terms of Service</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cake Gallery — Golden Crumb Bakery</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .filter-bar{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-bottom:44px; }
+  .filter-btn{
+    padding:11px 24px; border-radius:999px; border:1.5px solid var(--line);
+    background:var(--paper); font-weight:700; font-size:0.88rem; cursor:pointer;
+    color:var(--crust); transition:all .25s ease;
+  }
+  .filter-btn:hover{ border-color:var(--caramel); }
+  .filter-btn.active{ background:var(--crust); color:var(--cream); border-color:var(--crust); }
+
+  .gallery-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:28px; }
+  .gallery-item.hidden{ display:none; }
+
+  .gallery-img{ position:relative; height:230px; overflow:hidden; cursor:zoom-in; }
+  .gallery-img img{ width:100%; height:100%; object-fit:cover; transition:transform .5s ease; }
+  .gallery-item:hover .gallery-img img{ transform:scale(1.08); }
+  .gallery-img .zoom-hint{
+    position:absolute; top:12px; right:12px; width:34px; height:34px; border-radius:50%;
+    background:rgba(46,27,15,0.55); color:#fff; display:flex; align-items:center; justify-content:center;
+    font-size:0.95rem; opacity:0; transition:opacity .25s ease;
+  }
+  .gallery-item:hover .zoom-hint{ opacity:1; }
+
+  /* Lightbox */
+  .lightbox{
+    position:fixed; inset:0; background:rgba(20,12,7,0.92); z-index:1000;
+    display:none; align-items:center; justify-content:center; padding:30px;
+  }
+  .lightbox.open{ display:flex; }
+  .lightbox img{ max-width:90vw; max-height:82vh; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,0.5); }
+  .lightbox-close{
+    position:absolute; top:26px; right:32px; background:none; border:none;
+    color:#fff; font-size:2rem; cursor:pointer; line-height:1;
+  }
+  .lightbox-caption{
+    position:absolute; bottom:34px; left:0; right:0; text-align:center; color:#fff; font-weight:700;
+  }
+  @media (max-width:980px){ .gallery-grid{ grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:600px){ .gallery-grid{ grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav container">
+    <a href="index.html" class="brand"><span class="brand-mark">🥐</span> Golden Crumb</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="services.html">Services</a></li>
+      <li><a href="gallery.html" class="active">Gallery</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="login.html">Login</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="signup.html" class="btn btn-outline btn-sm">Sign Up</a>
+      <a href="cart.html" class="cart-link" aria-label="Cart">🛒<span class="cart-count" data-cart-count>0</span></a>
+      <button class="nav-toggle" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+</header>
+
+<section class="page-hero">
+  <div class="container">
+    <span class="eyebrow">Our Creations</span>
+    <h1>Cake Gallery</h1>
+    <div class="breadcrumb"><a href="index.html">Home</a> / Gallery</div>
+  </div>
+</section>
+
+<section class="section-cream">
+  <div class="container">
+    <div class="section-header center">
+      <span class="eyebrow">Browse & Order</span>
+      <h2>Wedding, Birthday & Celebration Cakes</h2>
+      <p>Every cake is baked and decorated in-house. Filter by occasion, click a photo to zoom in, or add straight to your cart.</p>
+    </div>
+
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="wedding">Wedding Cakes</button>
+      <button class="filter-btn" data-filter="birthday">Birthday Cakes</button>
+      <button class="filter-btn" data-filter="celebration">Celebration Cakes</button>
+    </div>
+
+    <div class="gallery-grid" id="galleryGrid">
+
+      <div class="card gallery-item" data-cat="wedding">
+        <div class="gallery-img"><img src="https://images.unsplash.com/photo-1607622750671-6cd9a99eabd1?auto=format&fit=crop&w=500&q=80" alt="White wedding cake with floral decoration"><span class="zoom-hint">🔍</span></div>
+        <div class="card-body">
+          <span class="badge">Wedding</span>
+          <h3>Ivory Rose Tier</h3>
+          <p>Two-tier vanilla sponge, buttercream finish, sugar rose detailing.</p>
+          <div class="card-footer"><span class="price">Rs. 12,000</span><button class="add-cart-btn" data-add-cart="w-ivoryrose">+ Add</button></div>
+        </div>
+      </div>
+
+      <div class="card gallery-item" data-cat="birthday">
+        <div class="gallery-img"><img src="https://images.unsplash.com/photo-1558301211-0d8c8ddee6ec?auto=format&fit=crop&w=500&q=80" alt="Colorful birthday cake with sprinkles"><span class="zoom-hint">🔍</span></div>
+        <div class="card-body">
+          <span class="badge">Birthday</span>
+          <h3>Confetti Sprinkle Cake</h3>
+          <p>Funfetti sponge, vanilla buttercream, loaded with rainbow sprinkles.</p>
+          <div class="card-footer"><span class="price">Rs. 2,800</span><button class="add-cart-btn" data-add-cart="b-confetti">+ Add</button></div>
+        </div>
+      </div>
+
+      <div class="card gallery-item" data-cat="celebration">
+        <div class="gallery-img"><img src="https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?auto=format&fit=crop&w=500&q=80" alt="Elegant celebration cake with gold accents"><span class="zoom-hint">🔍</span></div>
+        <div class="card-body">
+          <span class="badge">Celebration</span>
+          <h3>Golden Hour Cake</h3>
+          <p>Caramel sponge with edible gold leaf and toffee drip finish.</p>
+          <div class="card-footer"><span class="price">Rs. 3,500</span><button class="add-cart-btn" data-add-cart="c-goldenhour">+ Add</button></div>
+        </div>
+      </div>
+
+      <div class="card gallery-item" data-cat="wedding">
+        <div class="gallery-img"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlQwhUj2ib3ezIFYqjUZjDtSUkN7lsEpCHuj0Wqh6pVg&s=10" alt="Three tier wedding cake"><span class="zoom-hint">🔍</span></div>
+        <div class="card-body">
+          <span class="badge">Wedding</span>
+          <h3>Classic Three-Tier</h3>
+          <p>Traditional white fondant showpiece for larger wedding parties.</p>
+          <div class="card-footer"><span class="price">Rs. 15,000</span><button class="add-cart-btn" data-add-cart="w-threetier">+ Add</button></div>
+        </div>
+      </div>
+
+      <div class="card gallery-item" data-cat="birthday">
+        <div class="gallery-img"><img src="https://images.unsplash.com/photo-1535141192574-5d4897c12636?auto=format&fit=crop&w=500&q=80" alt="Number shaped birthday cake"><span class="zoom-hint">🔍</span></div>
+        <div class="card-body">
+          <span class="badge">Birthday</span>
+          <h3>Milestone Number Cake</h3>
+          <p>Cake shaped to any age or number, chocolate or vanilla sponge.</p>
+          <div class="card-footer"><span class="price">Rs. 3,200</span><button class="add-cart-btn" data-add-cart="b-milestone">+ Add</button></div>
+        </div>
+      </div>
+
+      <div class="card gallery-item" data-cat="celebration">
+        <div class="gallery-img"><img src="https://images.unsplash.com/photo-1621303837174-89787a7d4729?auto=format&fit=crop&w=500&q=80" alt="Pastel celebration cake"><span class="zoom-hint">🔍</span></div>
+        <div class="card-body">
+          <span class="badge">Celebration</span>
+          <h3>Pastel Dream Cake</h3>
+          <p>Soft ombre buttercream in pastel tones with fresh flower topper.</p>
+          <div class="card-footer"><span class="price">Rs. 3,800</span><button class="add-cart-btn" data-add-cart="c-pasteldream">+ Add</button></div>
+        </div>
+      </div>
+
+      <div class="card gallery-item" data-cat="wedding">
+        <div class="gallery-img"><img src="https://www.southernliving.com/thmb/DQ-CBONS72HTiC56BG9xmD7vtQk=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/Berry_Chantilly_Cake_019-d851d1f97a184264b10a1f400d2ee66b.jpg" alt="Naked wedding cake with berries"><span class="zoom-hint">🔍</span></div>
+        <div class="card-body">
+          <span class="badge">Wedding</span>
+          <h3>Rustic Berry Naked Cake</h3>
+          <p>Semi-naked sponge layered with fresh berries and cream.</p>
+          <div class="card-footer"><span class="price">Rs. 9,500</span><button class="add-cart-btn" data-add-cart="w-rusticberry">+ Add</button></div>
+        </div>
+      </div>
+
+      <div class="card gallery-item" data-cat="birthday">
+        <div class="gallery-img"><img src="https://images.unsplash.com/photo-1607478900766-efe13248b125?auto=format&fit=crop&w=500&q=80" alt="Chocolate birthday cupcakes"><span class="zoom-hint">🔍</span></div>
+        <div class="card-body">
+          <span class="badge">Birthday</span>
+          <h3>Party Cupcake Tower</h3>
+          <p>24-piece cupcake tower, mixed flavours, themed toppers included.</p>
+          <div class="card-footer"><span class="price">Rs. 2,200</span><button class="add-cart-btn" data-add-cart="b-cupcaketower">+ Add</button></div>
+        </div>
+      </div>
+
+      <div class="card gallery-item" data-cat="celebration">
+        <div class="gallery-img"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4yOa3HndTc1_ucjkMZNII82RnOajRDqogeymH2gOxxqkHLB-mAEP0-SM&s=10" alt="Anniversary celebration cake"><span class="zoom-hint">🔍</span></div>
+        <div class="card-body">
+          <span class="badge">Celebration</span>
+          <h3>Anniversary Special</h3>
+          <p>Red velvet sponge with cream-cheese frosting and gold script topper.</p>
+          <div class="card-footer"><span class="price">Rs. 4,200</span><button class="add-cart-btn" data-add-cart="c-anniversary">+ Add</button></div>
+        </div>
+      </div>
+
+      <div class="card gallery-item" data-cat="wedding">
+        <div class="gallery-img"><img src="https://images.unsplash.com/photo-1627077457293-ad94bae34e22?q=80&w=1165&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Pink floral wedding cake"><span class="zoom-hint">🔍</span></div>
+        <div class="card-body">
+          <span class="badge">Wedding</span>
+          <h3>Blush Floral Tier</h3>
+          <p>Blush peach buttercream with cascading sugar florals.</p>
+          <div class="card-footer"><span class="price">Rs. 11,000</span><button class="add-cart-btn" data-add-cart="w-blushfloral">+ Add</button></div>
+        </div>
+      </div>
+
+      <div class="card gallery-item" data-cat="birthday">
+        <div class="gallery-img"><img src="https://t3.ftcdn.net/jpg/02/56/20/36/360_F_256203641_oEl56isLMgFmDv5TsVOHQtp8dIclS0f7.jpg" alt="Kids birthday cake with candles"><span class="zoom-hint">🔍</span></div>
+        <div class="card-body">
+          <span class="badge">Birthday</span>
+          <h3>Candle Wish Cake</h3>
+          <p>Classic round layer cake, ready for candles and a wish.</p>
+          <div class="card-footer"><span class="price">Rs. 2,600</span><button class="add-cart-btn" data-add-cart="b-candlewish">+ Add</button></div>
+        </div>
+      </div>
+
+      <div class="card gallery-item" data-cat="celebration">
+        <div class="gallery-img"><img src="https://images.unsplash.com/photo-1702841579337-410618db2715?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Graduation celebration cake"><span class="zoom-hint">🔍</span></div>
+        <div class="card-body">
+          <span class="badge">Celebration</span>
+          <h3>Graduation Cap Cake</h3>
+          <p>Chocolate sponge topped with a fondant graduation cap design.</p>
+          <div class="card-footer"><span class="price">Rs. 3,000</span><button class="add-cart-btn" data-add-cart="c-graduation">+ Add</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="section-cream" style="padding-top:0;">
+  <div class="container">
+    <div class="cta-band">
+      <div>
+        <h2>Need something custom?</h2>
+        <p>Tell us about your event and we'll design a cake just as special for you.</p>
+      </div>
+      <a href="contact.html" class="btn" style="background:var(--butter); color:var(--crust);">Request a Custom Cake →</a>
+    </div>
+  </div>
+</section>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose">&times;</button>
+  <img id="lightboxImg" src="" alt="">
+  <div class="lightbox-caption" id="lightboxCaption"></div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="brand"><span class="brand-mark">🥐</span> Golden Crumb</div>
+        <p>Handmade bread, cakes & pastries baked fresh every morning in the heart of Karachi.</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Facebook">f</a>
+          <a href="#" aria-label="Instagram">◎</a>
+          <a href="#" aria-label="WhatsApp">☎</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="services.html">Services</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Account</h4>
+        <ul>
+          <li><a href="login.html">Login</a></li>
+          <li><a href="signup.html">Sign Up</a></li>
+          <li><a href="cart.html">My Cart</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Stay Updated</h4>
+        <p style="font-size:0.85rem; margin-bottom:14px;">Get new flavours & offers in your inbox.</p>
+        <div class="newsletter-row">
+          <input type="email" placeholder="Your email">
+          <button>Join</button>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Golden Crumb Bakery. All rights reserved.</span>
+      <span><a href="#">Privacy Policy</a><a href="#">Terms of Service</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/script.js"></script>
+<script>
+  // Filter logic
+  const filterBtns = document.querySelectorAll(".filter-btn");
+  const items = document.querySelectorAll(".gallery-item");
+  filterBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      filterBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const filter = btn.getAttribute("data-filter");
+      items.forEach(item => {
+        const match = filter === "all" || item.getAttribute("data-cat") === filter;
+        item.classList.toggle("hidden", !match);
+      });
+    });
+  });
+
+  // Lightbox logic — only the image opens the zoom view, not the whole card
+  const lightbox = document.getElementById("lightbox");
+  const lightboxImg = document.getElementById("lightboxImg");
+  const lightboxCaption = document.getElementById("lightboxCaption");
+  document.querySelectorAll(".gallery-img").forEach(imgWrap => {
+    imgWrap.addEventListener("click", () => {
+      const img = imgWrap.querySelector("img");
+      const title = imgWrap.closest(".gallery-item").querySelector("h3").textContent;
+      lightboxImg.src = img.src;
+      lightboxImg.alt = img.alt;
+      lightboxCaption.textContent = title;
+      lightbox.classList.add("open");
+    });
+  });
+  document.getElementById("lightboxClose").addEventListener("click", () => lightbox.classList.remove("open"));
+  lightbox.addEventListener("click", (e) => { if(e.target === lightbox) lightbox.classList.remove("open"); });
+</script>
+</body>
+</html>

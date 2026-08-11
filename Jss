@@ -1,0 +1,199 @@
+/* ===========================================================
+   Golden Crumb Bakery — Shared Script
+   Handles: mobile nav, cart (localStorage), toast, cart page render
+   =========================================================== */
+
+/* ---------- Product catalog (used by home, services, cart) ---------- */
+const PRODUCTS = {
+  "sourdough":   { name: "Classic Sourdough Loaf",     price: 450,  img: "https://images.unsplash.com/photo-1585478259715-4d3a5f3a6c0a?auto=format&fit=crop&w=400&q=80" },
+  "croissant":   { name: "Butter Croissant",           price: 180,  img: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=400&q=80" },
+  "fudgecake":   { name: "Chocolate Fudge Cake",       price: 2200, img: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=400&q=80" },
+  "redvelvet":   { name: "Red Velvet Cupcakes (Box 6)",price: 950,  img: "https://images.unsplash.com/photo-1607478900766-efe13248b125?auto=format&fit=crop&w=400&q=80" },
+  "cinnamon":    { name: "Cinnamon Rolls",             price: 650,  img: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80" },
+  "fruittart":   { name: "Fresh Fruit Tart",           price: 400,  img: "https://images.unsplash.com/photo-1519915028121-7d3463d20b13?auto=format&fit=crop&w=400&q=80" }
+};
+
+/* ---------- Cart helpers ---------- */
+function getCart(){
+  return JSON.parse(localStorage.getItem("gc_cart") || "{}");
+}
+function saveCart(cart){
+  localStorage.setItem("gc_cart", JSON.stringify(cart));
+  updateCartCount();
+}
+function addToCart(id, qty = 1){
+  const cart = getCart();
+  cart[id] = (cart[id] || 0) + qty;
+  saveCart(cart);
+  showToast(`${PRODUCTS[id] ? PRODUCTS[id].name : "Item"} added to cart`);
+}
+function removeFromCart(id){
+  const cart = getCart();
+  delete cart[id];
+  saveCart(cart);
+  renderCartPage();
+}
+function changeQty(id, delta){
+  const cart = getCart();
+  if(!cart[id]) return;
+  cart[id] += delta;
+  if(cart[id] <= 0) delete cart[id];
+  saveCart(cart);
+  renderCartPage();
+}
+function cartCount(){
+  const cart = getCart();
+  return Object.values(cart).reduce((a,b) => a + b, 0);
+}
+function updateCartCount(){
+  document.querySelectorAll("[data-cart-count]").forEach(el => {
+    el.textContent = cartCount();
+  });
+}
+
+/* ---------- Toast ---------- */
+function showToast(msg){
+  let toast = document.querySelector(".toast");
+  if(!toast){
+    toast = document.createElement("div");
+    toast.className = "toast";
+    document.body.appendChild(toast);
+  }
+  toast.innerHTML = `🧺 &nbsp;${msg}`;
+  toast.classList.add("show");
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
+}
+
+/* ---------- Mobile nav ---------- */
+function initNavToggle(){
+  const toggle = document.querySelector(".nav-toggle");
+  const links = document.querySelector(".nav-links");
+  if(!toggle || !links) return;
+  toggle.addEventListener("click", () => links.classList.toggle("open"));
+}
+
+/* ---------- Add-to-cart buttons ---------- */
+function initAddToCartButtons(){
+  document.querySelectorAll("[data-add-cart]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-add-cart");
+      addToCart(id, 1);
+      const originalText = btn.innerHTML;
+      btn.classList.add("added");
+      btn.innerHTML = "✓ Added";
+      setTimeout(() => { btn.classList.remove("added"); btn.innerHTML = originalText; }, 1400);
+    });
+  });
+}
+
+/* ---------- Render cart page ---------- */
+function renderCartPage(){
+  const wrap = document.querySelector("[data-cart-items]");
+  if(!wrap) return;
+  const cart = getCart();
+  const ids = Object.keys(cart);
+
+  if(ids.length === 0){
+    wrap.innerHTML = `
+      <div class="cart-empty">
+        <div class="ic">🧁</div>
+        <h3>Your cart is empty</h3>
+        <p style="color:rgba(42,29,20,0.6); margin:10px 0 24px;">Looks like you haven't added any treats yet.</p>
+        <a href="services.html" class="btn btn-primary">Browse Menu</a>
+      </div>`;
+    document.querySelector("[data-cart-subtotal]") && (document.querySelector("[data-cart-subtotal]").textContent = "Rs. 0");
+    document.querySelector("[data-cart-total]") && (document.querySelector("[data-cart-total]").textContent = "Rs. 0");
+    return;
+  }
+
+  let subtotal = 0;
+  wrap.innerHTML = ids.map(id => {
+    const p = PRODUCTS[id];
+    if(!p) return "";
+    const lineTotal = p.price * cart[id];
+    subtotal += lineTotal;
+    return `
+      <div class="cart-item">
+        <img src="${p.img}" alt="${p.name}">
+        <div>
+          <h4>${p.name}</h4>
+          <div class="unit">Rs. ${p.price} / item</div>
+        </div>
+        <div class="qty-box">
+          <button aria-label="Decrease quantity" onclick="changeQty('${id}',-1)">−</button>
+          <span>${cart[id]}</span>
+          <button aria-label="Increase quantity" onclick="changeQty('${id}',1)">+</button>
+        </div>
+        <div style="font-weight:800; color:var(--crust);">Rs. ${lineTotal.toLocaleString()}</div>
+        <button class="remove-btn" aria-label="Remove item" onclick="removeFromCart('${id}')">✕</button>
+      </div>`;
+  }).join("");
+
+  const delivery = subtotal > 0 ? 150 : 0;
+  const total = subtotal + delivery;
+
+  document.querySelector("[data-cart-subtotal]") && (document.querySelector("[data-cart-subtotal]").textContent = `Rs. ${subtotal.toLocaleString()}`);
+  document.querySelector("[data-cart-delivery]") && (document.querySelector("[data-cart-delivery]").textContent = `Rs. ${delivery}`);
+  document.querySelector("[data-cart-total]") && (document.querySelector("[data-cart-total]").textContent = `Rs. ${total.toLocaleString()}`);
+}
+
+/* ---------- Contact / login / signup form (demo — no backend) ---------- */
+function initDemoForm(formSelector, successMsg){
+  const form = document.querySelector(formSelector);
+  if(!form) return;
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    showToast(successMsg);
+    form.reset();
+  });
+}
+
+/* ---------- Init on every page ---------- */
+document.addEventListener("DOMContentLoaded", () => {
+  initNavToggle();
+  updateCartCount();
+  initAddToCartButtons();
+  renderCartPage();
+  initDemoForm("[data-contact-form]", "Message sent! We'll reply soon 🍰");
+  initDemoForm("[data-login-form]", "Welcome back! Logging you in…");
+  initDemoForm("[data-signup-form]", "Account created! Welcome to Golden Crumb 🎉");
+});
+
+/* ---------- Checkout via WhatsApp ---------- */
+const BAKERY_WHATSAPP_NUMBER = "923001234567"; // +92 300 1234567 (no + or spaces, wa.me format)
+
+function checkoutViaWhatsApp(){
+  const cart = getCart();
+  const ids = Object.keys(cart);
+
+  if(ids.length === 0){
+    showToast("Your cart is empty — add something first!");
+    return;
+  }
+
+  let subtotal = 0;
+  const lines = ["Hello Golden Crumb Bakery! 👋 I'd like to place an order:", ""];
+
+  ids.forEach(id => {
+    const p = PRODUCTS[id];
+    if(!p) return;
+    const lineTotal = p.price * cart[id];
+    subtotal += lineTotal;
+    lines.push(`• ${p.name} x${cart[id]} — Rs. ${lineTotal.toLocaleString()}`);
+  });
+
+  const delivery = subtotal > 0 ? 150 : 0;
+  const total = subtotal + delivery;
+
+  lines.push("");
+  lines.push(`Subtotal: Rs. ${subtotal.toLocaleString()}`);
+  lines.push(`Delivery: Rs. ${delivery}`);
+  lines.push(`Total: Rs. ${total.toLocaleString()}`);
+  lines.push("");
+  lines.push("Please confirm availability and delivery time. Thank you!");
+
+  const message = encodeURIComponent(lines.join("\n"));
+  const url = `https://wa.me/${BAKERY_WHATSAPP_NUMBER}?text=${message}`;
+  window.open(url, "_blank");
+}

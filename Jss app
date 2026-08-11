@@ -1,0 +1,318 @@
+/* ==========================================================================
+   LEDGER — Expense Tracker
+   Vanilla JS app logic. No frameworks, no build step.
+
+   Responsibilities:
+   1. Persist transactions to localStorage (survives page refresh/close)
+   2. Render the balance hero, income/expense totals, and the transaction
+      table from whatever is in memory
+   3. Handle the "add transaction" form, per-row delete, "clear all",
+      and the All / Income / Expense filter
+   ========================================================================== */
+
+(function () {
+  "use strict";
+
+  /* ---- Constants ------------------------------------------------------- */
+  const STORAGE_KEY = "ledger.transactions.v1";
+
+  /* ---- DOM references ---------------------------------------------------
+     Grabbing every element once up front keeps the render functions below
+     free of repeated document.getElementById calls. */
+  const form = document.getElementById("transaction-form");
+  const descriptionInput = document.getElementById("description");
+  const amountInput = document.getElementById("amount");
+  const categoryInput = document.getElementById("category");
+  const formError = document.getElementById("form-error");
+
+  const balanceFigureEl = document.getElementById("balance-figure");
+  const balanceStatusEl = document.getElementById("balance-status");
+  const totalIncomeEl = document.getElementById("total-income");
+  const totalExpenseEl = document.getElementById("total-expense");
+
+  const transactionListEl = document.getElementById("transaction-list");
+  const emptyStateEl = document.getElementById("empty-state");
+
+  const clearAllBtn = document.getElementById("clear-all-btn");
+  const filterRadios = document.querySelectorAll('input[name="filter"]');
+
+  const toastEl = document.getElementById("app-toast");
+  const toastBodyEl = document.getElementById("toast-body");
+  const toast = new bootstrap.Toast(toastEl, { delay: 2200 });
+
+  /* ---- App state ---------------------------------------------------------
+     `transactions` is the single source of truth in memory. Every mutation
+     goes through addTransaction()/deleteTransaction()/clearAll(), each of
+     which re-saves to localStorage and re-renders the UI. */
+  let transactions = loadTransactions();
+  let currentFilter = "all"; // "all" | "income" | "expense"
+
+  /* =========================================================================
+     LOCAL STORAGE HELPERS
+     ========================================================================= */
+
+  /**
+   * Reads and parses the transaction list from localStorage.
+   * Falls back to an empty array if nothing is stored yet, or if the
+   * stored value is corrupted/unparsable (defensive — keeps the app from
+   * crashing on a bad localStorage value).
+   */
+  function loadTransactions() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (err) {
+      console.error("Ledger: could not read saved transactions.", err);
+      return [];
+    }
+  }
+
+  /** Persists the current in-memory transaction list to localStorage. */
+  function saveTransactions() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+    } catch (err) {
+      // Most likely a quota-exceeded error in private browsing mode.
+      console.error("Ledger: could not save transactions.", err);
+    }
+  }
+
+  /* =========================================================================
+     FORMATTING HELPERS
+     ========================================================================= */
+
+  const currencyFormatter = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  });
+
+  function formatCurrency(value) {
+    return currencyFormatter.format(value);
+  }
+
+  function formatDate(isoString) {
+    const date = new Date(isoString);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  }
+
+  /** Minimal HTML-escaping so a description like "<script>" renders as text. */
+  function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  /* =========================================================================
+     CORE ACTIONS
+     ========================================================================= */
+
+  /**
+   * Adds a new transaction to state, persists it, and re-renders.
+   * @param {{description: string, amount: number, category: string, type: string}} entry
+   */
+  function addTransaction(entry) {
+    const transaction = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+      description: entry.description.trim(),
+      amount: Math.abs(entry.amount), // always stored positive; sign comes from `type`
+      category: entry.category,
+      type: entry.type, // "income" | "expense"
+      date: new Date().toISOString(),
+    };
+
+    transactions.unshift(transaction); // newest first
+    saveTransactions();
+    renderAll();
+  }
+
+  /** Removes a single transaction by id. */
+  function deleteTransaction(id) {
+    transactions = transactions.filter((t) => t.id !== id);
+    saveTransactions();
+    renderAll();
+  }
+
+  /** Wipes every transaction (used by the "clear all" button). */
+  function clearAllTransactions() {
+    transactions = [];
+    saveTransactions();
+    renderAll();
+  }
+
+  /* =========================================================================
+     RENDERING
+     ========================================================================= */
+
+  /** Recomputes totals and repaints every part of the UI. Call after any mutation. */
+  function renderAll() {
+    renderSummary();
+    renderTransactionList();
+  }
+
+  /** Updates the hero balance figure and the income/expense stat blocks. */
+  function renderSummary() {
+    const totals = transactions.reduce(
+      (acc, t) => {
+        if (t.type === "income") acc.income += t.amount;
+        else acc.expense += t.amount;
+        return acc;
+      },
+      { income: 0, expense: 0 }
+    );
+
+    const balance = totals.income - totals.expense;
+
+    balanceFigureEl.textContent = formatCurrency(balance);
+    balanceFigureEl.classList.toggle("is-negative", balance < 0);
+    totalIncomeEl.textContent = formatCurrency(totals.income);
+    totalExpenseEl.textContent = formatCurrency(totals.expense);
+
+    if (transactions.length === 0) {
+      balanceStatusEl.textContent = "Your ledger is empty — add your first entry.";
+    } else if (balance < 0) {
+      balanceStatusEl.textContent = "You're spending more than you're bringing in.";
+    } else {
+      balanceStatusEl.textContent = `${transactions.length} entr${transactions.length === 1 ? "y" : "ies"} recorded.`;
+    }
+  }
+
+  /** Rebuilds the transaction table rows based on the current filter. */
+  function renderTransactionList() {
+    const visible = transactions.filter((t) => {
+      if (currentFilter === "all") return true;
+      return t.type === currentFilter;
+    });
+
+    if (visible.length === 0) {
+      transactionListEl.innerHTML = "";
+      emptyStateEl.classList.add("is-visible");
+      return;
+    }
+
+    emptyStateEl.classList.remove("is-visible");
+
+    transactionListEl.innerHTML = visible
+      .map((t) => {
+        const sign = t.type === "income" ? "+" : "\u2212"; // real minus sign, not a hyphen
+        return `
+          <tr data-id="${t.id}">
+            <td class="tx-desc">${escapeHtml(t.description)}</td>
+            <td><span class="tx-category-pill">${escapeHtml(t.category)}</span></td>
+            <td class="tx-date">${formatDate(t.date)}</td>
+            <td class="text-end tx-amount ${t.type}">${sign} ${formatCurrency(t.amount)}</td>
+            <td class="text-end">
+              <button type="button" class="tx-delete-btn" data-action="delete" data-id="${t.id}" title="Delete this entry" aria-label="Delete ${escapeHtml(t.description)}">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      })
+      .join("");
+  }
+
+  /* =========================================================================
+     FORM VALIDATION + SUBMIT
+     ========================================================================= */
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const description = descriptionInput.value;
+    const amount = parseFloat(amountInput.value);
+    const category = categoryInput.value;
+    const type = form.querySelector('input[name="type"]:checked').value;
+
+    const isValid =
+      description.trim().length > 0 &&
+      !Number.isNaN(amount) &&
+      amount > 0 &&
+      category !== "";
+
+    form.classList.add("was-validated");
+
+    if (!isValid) {
+      formError.classList.remove("d-none");
+      return;
+    }
+
+    formError.classList.add("d-none");
+
+    addTransaction({ description, amount, category, type });
+
+    // Reset the form for the next entry, but keep it feeling snappy —
+    // no page reload, focus goes straight back to the description field.
+    form.reset();
+    form.classList.remove("was-validated");
+    document.getElementById("type-income").checked = true;
+    descriptionInput.focus();
+
+    showToast(`"${description.trim()}" added to the ledger.`);
+  });
+
+  /* =========================================================================
+     DELETE (event delegation — one listener handles every row's button,
+     including rows added after the page first loaded)
+     ========================================================================= */
+
+  transactionListEl.addEventListener("click", function (event) {
+    const btn = event.target.closest('[data-action="delete"]');
+    if (!btn) return;
+
+    const id = btn.getAttribute("data-id");
+    const tx = transactions.find((t) => t.id === id);
+    deleteTransaction(id);
+
+    if (tx) showToast(`"${tx.description}" removed.`);
+  });
+
+  /* =========================================================================
+     CLEAR ALL
+     ========================================================================= */
+
+  clearAllBtn.addEventListener("click", function () {
+    if (transactions.length === 0) return;
+    const confirmed = window.confirm(
+      "Delete all transactions? This can't be undone."
+    );
+    if (confirmed) {
+      clearAllTransactions();
+      showToast("All transactions cleared.");
+    }
+  });
+
+  /* =========================================================================
+     FILTER (All / Income / Expense)
+     ========================================================================= */
+
+  filterRadios.forEach((radio) => {
+    radio.addEventListener("change", function () {
+      if (this.id === "filter-income") currentFilter = "income";
+      else if (this.id === "filter-expense") currentFilter = "expense";
+      else currentFilter = "all";
+      renderTransactionList();
+    });
+  });
+
+  /* =========================================================================
+     TOAST HELPER
+     ========================================================================= */
+
+  function showToast(message) {
+    toastBodyEl.textContent = message;
+    toast.show();
+  }
+
+  /* =========================================================================
+     INITIAL RENDER
+     ========================================================================= */
+
+  renderAll();
+})();
